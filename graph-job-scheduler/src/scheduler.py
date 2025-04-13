@@ -1,42 +1,37 @@
-from collections import deque, defaultdict
+from collections import deque
 
 class Scheduler:
     def __init__(self, graph):
         self.graph = graph
 
     def topological_sort(self):
-        # Step 1: Reverse the graph and calculate outdegrees
-        reverse_graph = defaultdict(list)
-        outdegree = {job: 0 for job in self.graph.adjacency_list}
+        # Calculate the outdegree for each job
+        outdegree = {job: len(dependencies) for job, dependencies in self.graph.adjacency_list.items()}
 
-        # Build the reverse graph and calculate outdegrees
-        for job, dependencies in self.graph.adjacency_list.items():
-            outdegree[job] = len(dependencies)
-            for dependency in dependencies:
-                reverse_graph[dependency].append(job)
+        # Use a queue to process jobs, starting with those having the smallest outdegree
+        queue = deque(sorted(outdegree.keys(), key=lambda job: (outdegree[job], job)))  # Sort by outdegree, then alphabetically
+        execution_order = []
 
-        # Step 2: Find sink nodes (outdegree == 0)
-        queue = deque([job for job, degree in outdegree.items() if degree == 0])
-
-        # Step 3: Perform topological sort using reverse edges
-        reverse_topo = []
         while queue:
+            # Process the job with the smallest outdegree
             current_job = queue.popleft()
-            reverse_topo.append(current_job)
+            execution_order.append(current_job)
 
-            for parent in reverse_graph[current_job]:
-                outdegree[parent] -= 1
-                if outdegree[parent] == 0:
-                    queue.append(parent)
+            # Remove the current job from the graph and update outdegree of its neighbors
+            for neighbor in self.graph.adjacency_list[current_job]:
+                outdegree[neighbor] -= 1
 
-        # Step 4: Reverse the result to get the actual topological order
-        reverse_topo.reverse()
+            # Re-sort the queue based on updated outdegree and alphabetical order
+            queue = deque(sorted(
+                [job for job in outdegree if job not in execution_order],
+                key=lambda job: (outdegree[job], job)
+            ))
 
-        # Step 5: Check for cycles
-        if len(reverse_topo) != len(self.graph.adjacency_list):
+        # Check for cycles (if all jobs are not processed)
+        if len(execution_order) != len(self.graph.adjacency_list):
             return None  # Cycle detected
 
-        return reverse_topo
+        return execution_order
 
     def job_dependency_count(self):
         return {job: len(dependencies) for job, dependencies in self.graph.adjacency_list.items()}
