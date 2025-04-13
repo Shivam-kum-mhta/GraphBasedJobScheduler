@@ -38,7 +38,16 @@ def main():
     # Initialize the scheduler and detect deadlocks
     scheduler = Scheduler(graph)
     deadlock_detector = DeadlockDetector(graph)
-
+    
+    # Check for deadlocks before scheduling
+    cycle = deadlock_detector.detect_deadlock()
+    if cycle:
+        print("Deadlock detected! Cycle found:", " -> ".join(cycle))
+        suggested_fix = deadlock_detector.suggest_fix(cycle)
+        print(suggested_fix)
+        # Don't proceed with scheduling if there's a deadlock
+        return
+    
     # Perform scheduling
     execution_order = scheduler.topological_sort()
     print("Execution Order:", execution_order)
@@ -54,9 +63,9 @@ def main():
         # else:
         #     output_file.write("No Deadlocks Found.\n")
 
-    # Visualize the job graph
-    visualizer = Visualizer(graph)
-    visualizer.render_graph(execution_order)
+    # # Visualize the job graph
+    # visualizer = Visualizer(graph)
+    # visualizer.render_graph(execution_order)
 
 if __name__ == "__main__":
     main()

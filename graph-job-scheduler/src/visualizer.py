@@ -12,22 +12,24 @@ class Visualizer:
 
         # Add nodes and edges to the graph
         for job, dependencies in self.graph.adjacency_list.items():  # Access adjacency_list
-            G.add_node(job)
+            G.add_node(job)  # Add the job as a node
             for dependency in dependencies:
-                G.add_edge(dependency, job)
+                G.add_edge(job, dependency)  # Add an edge from the job to its dependency (out-degree)
 
         # Set node colors based on execution order
         color_map = []
         for node in G.nodes():
             if execution_order and node in execution_order:
                 color_map.append('green')  # Jobs in execution order
-            elif not any(node in dependencies for dependencies in self.graph.adjacency_list.values()):
-                color_map.append('red')  # End jobs
+            elif len(list(G.successors(node))) == 0:
+                color_map.append('red')  # End jobs (no outgoing edges)
             else:
-                color_map.append('blue')  # Start jobs
+                color_map.append('blue')  # Start jobs or intermediate jobs
 
-        # Draw the graph
+        # Generate positions for nodes in the graph layout
         pos = nx.spring_layout(G)
-        nx.draw(G, pos, with_labels=True, node_color=color_map, arrows=True)
-        plt.title("Job Dependency Graph")
+
+        # Draw the graph with labels, colors, and arrows for dependencies
+        nx.draw(G, pos, with_labels=True, node_color=color_map, arrows=True, edge_color='gray')
+        plt.title("Job Dependency Graph (Reversed Execution Order)")
         plt.show()
