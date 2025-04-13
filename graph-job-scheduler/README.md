@@ -35,9 +35,7 @@ graph-job-scheduler
 
 ## Installation
 1. Clone the repository:
-   ```
-   git clone https://github.com/yourusername/graph-job-scheduler.git
-   ```
+
 2. Navigate to the project directory:
    ```
    cd graph-job-scheduler
