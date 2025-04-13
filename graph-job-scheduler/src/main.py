@@ -20,9 +20,18 @@ def main():
     graph = Graph()
     with open(input_file, 'r') as file:
         for line in file:
-            jobs = line.strip().split()
-            if len(jobs) == 2:
-                graph.add_dependency(jobs[0], jobs[1])
+            # Parse the new input format (e.g., A: [B, C, D])
+            line = line.strip()
+            if not line:
+                continue
+            job, dependencies = line.split(':')
+            job = job.strip()
+            dependencies = dependencies.strip().strip('[]').split(', ')
+            graph.add_job(job)
+            for dependency in dependencies:
+                if dependency:  # Ensure no empty strings are added
+                    graph.add_job(dependency)
+                    graph.add_dependency(job, dependency)
 
     print("Graph Adjacency List:", graph.adjacency_list)
 
@@ -32,6 +41,7 @@ def main():
 
     # Perform scheduling
     execution_order = scheduler.topological_sort()
+    print("Execution Order:", execution_order)
     # deadlocks = deadlock_detector.detect_deadlock()
 
     # Output results

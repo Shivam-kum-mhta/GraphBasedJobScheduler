@@ -1,29 +1,42 @@
+from collections import deque, defaultdict
+
 class Scheduler:
     def __init__(self, graph):
         self.graph = graph
 
     def topological_sort(self):
-        in_degree = {u: 0 for u in self.graph.adjacency_list}
-        for u in self.graph.adjacency_list:
-            for v in self.graph.adjacency_list[u]:
-                in_degree[v] += 1
+        # Step 1: Reverse the graph and calculate outdegrees
+        reverse_graph = defaultdict(list)
+        outdegree = {job: 0 for job in self.graph.adjacency_list}
 
-        queue = [u for u in in_degree if in_degree[u] == 0]
-        execution_order = []
+        # Build the reverse graph and calculate outdegrees
+        for job, dependencies in self.graph.adjacency_list.items():
+            outdegree[job] = len(dependencies)
+            for dependency in dependencies:
+                reverse_graph[dependency].append(job)
 
+        # Step 2: Find sink nodes (outdegree == 0)
+        queue = deque([job for job, degree in outdegree.items() if degree == 0])
+
+        # Step 3: Perform topological sort using reverse edges
+        reverse_topo = []
         while queue:
-            u = queue.pop(0)
-            execution_order.append(u)
+            current_job = queue.popleft()
+            reverse_topo.append(current_job)
 
-            for v in self.graph.adjacency_list[u]:
-                in_degree[v] -= 1
-                if in_degree[v] == 0:
-                    queue.append(v)
+            for parent in reverse_graph[current_job]:
+                outdegree[parent] -= 1
+                if outdegree[parent] == 0:
+                    queue.append(parent)
 
-        if len(execution_order) != len(self.graph.adjacency_list):
+        # Step 4: Reverse the result to get the actual topological order
+        reverse_topo.reverse()
+
+        # Step 5: Check for cycles
+        if len(reverse_topo) != len(self.graph.adjacency_list):
             return None  # Cycle detected
 
-        return execution_order
+        return reverse_topo
 
     def job_dependency_count(self):
         return {job: len(dependencies) for job, dependencies in self.graph.adjacency_list.items()}
