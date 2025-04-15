@@ -54,7 +54,7 @@ class DeadlockDetector:
         # Find the edge that would break the cycle with minimal impact
         # We'll suggest removing the last edge in the cycle
         if len(cycle) >= 2:
-            last_node = cycle[-1]
+            second_node = cycle[1]
             first_node = cycle[0]
-            return f"Suggested Fix: Remove dependency {last_node} -> {first_node}"
+            return f"Suggested Fix: Remove dependency {first_node} -> {second_node}"
         return "Suggested Fix: Remove one of the self-dependencies"

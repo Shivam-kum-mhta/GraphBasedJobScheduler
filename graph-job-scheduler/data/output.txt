@@ -1,1 +1,1 @@
-Job Execution Order: G → I → K → D → E → H → J → B → F → C → A
+Job Execution Order: G → I → K → E → J → F → H → C → D → B → A
